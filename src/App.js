@@ -40,17 +40,24 @@ const List = () => (
     ))}
   </ul>
 )
-const App = () => (
-  <div>
-    <h1>My hacker stories</h1>
+const App = () => {
+  // Event handler Synthetic function
+  const handleChange = (event) => {
+    console.log(event.target.value)
+  }
 
-    <label htmlFor="search">Search:</label>
-    <input id="search" type="text" />
+  return (
+    <div>
+      <h1>My hacker stories</h1>
 
-    <hr />
+      <label htmlFor="search">Search:</label>
+      <input id="search" type="text" onChange={handleChange} />
 
-    <List />
-  </div>
-)
+      <hr />
+
+      <List />
+    </div>
+  )
+}
 
 export default App
