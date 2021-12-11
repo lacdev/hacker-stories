@@ -1,15 +1,10 @@
 import './App.css'
 
-const welcome = {
-  greeting: 'Hey',
-  title: 'React',
-}
-
-// const getTitle = (title) => title
-
-const List = (props) => (
+import { useState } from 'react'
+//props argument => list attribute on List instantiation => stories array variable on the (parent) App component scope.
+const List = ({ list }) => (
   <ul>
-    {props.list.map((item) => (
+    {list.map((item) => (
       <li key={item.objectID}>
         <span>
           <a href={item.url}>{item.title}</a>
@@ -41,9 +36,16 @@ const App = () => {
       objectID: 1,
     },
   ]
-  // Event handler Synthetic function
+
+  //useState hook returns an array with 2 values
+  //first value represents the current State
+  //Second value is the state updater function
+
+  const [searchTerm, setSearchTerm] = useState('')
+
+  // Event handler Synthetic event function
   const handleChange = (event) => {
-    console.log(event.target.value)
+    setSearchTerm(event.target.value)
   }
 
   return (
@@ -52,6 +54,10 @@ const App = () => {
 
       <label htmlFor="search">Search:</label>
       <input id="search" type="text" onChange={handleChange} />
+
+      <p>
+        Searching for <strong>{searchTerm}</strong>
+      </p>
 
       <hr />
 
