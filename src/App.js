@@ -1,7 +1,9 @@
 import './App.css'
 
 import { useState } from 'react'
-//props argument => list attribute on List instantiation => stories array variable on the (parent) App component scope.
+//props argument => list attribute on List instantiation =>
+//stories array variable on the (parent) App component scope.
+
 const List = ({ list }) => (
   <ul>
     {list.map((item) => (
@@ -17,7 +19,30 @@ const List = ({ list }) => (
   </ul>
 )
 
+const Search = (props) => {
+  const [searchTerm, setSearchTerm] = useState('')
+
+  const handleChange = (event) => {
+    setSearchTerm(event.target.value)
+    props.onSearch(event)
+  }
+
+  return (
+    <div>
+      <label htmlFor="search">Search:</label>
+      <input id="search" type="text" onChange={handleChange} />
+      <p>
+        Searching for <strong>{searchTerm}</strong>
+      </p>
+    </div>
+  )
+}
+
 const App = () => {
+  const handleSearch = (event) => {
+    console.log(event.target.value)
+  }
+
   const stories = [
     {
       title: 'React',
@@ -37,30 +62,11 @@ const App = () => {
     },
   ]
 
-  //useState hook returns an array with 2 values
-  //first value represents the current State
-  //Second value is the state updater function
-
-  const [searchTerm, setSearchTerm] = useState('')
-
-  // Event handler Synthetic event function
-  const handleChange = (event) => {
-    setSearchTerm(event.target.value)
-  }
-
   return (
     <div>
       <h1>My hacker stories</h1>
-
-      <label htmlFor="search">Search:</label>
-      <input id="search" type="text" onChange={handleChange} />
-
-      <p>
-        Searching for <strong>{searchTerm}</strong>
-      </p>
-
       <hr />
-
+      <Search onSearch={handleSearch} />
       <List list={stories} />
     </div>
   )
