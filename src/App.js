@@ -5,10 +5,6 @@ import { useState } from 'react'
 //stories array variable on the (parent) App component scope.
 
 const App = () => {
-  const handleSearch = (event) => {
-    console.log(event.target.value)
-  }
-
   const stories = [
     {
       title: 'React',
@@ -27,32 +23,36 @@ const App = () => {
       objectID: 1,
     },
   ]
+  const [searchTerm, setSearchTerm] = useState('React')
+
+  const handleSearch = (event) => {
+    setSearchTerm(event.target.value)
+  }
+
+  const searchedStories = stories.filter((story) =>
+    story.title.toLowerCase().includes(searchTerm.toLowerCase())
+  )
 
   return (
     <div>
       <h1>My hacker stories</h1>
-      <Search onSearch={handleSearch} />
+      <Search search={searchTerm} onSearch={handleSearch} />
       <hr />
-      <List list={stories} />
+      <List list={searchedStories} />
     </div>
   )
 }
 
 const Search = (props) => {
-  const [searchTerm, setSearchTerm] = useState('')
-
-  const handleChange = (event) => {
-    setSearchTerm(event.target.value)
-    props.onSearch(event)
-  }
-
   return (
     <div>
       <label htmlFor="search">Search:</label>
-      <input id="search" type="text" onChange={handleChange} />
-      <p>
-        Searching for <strong>{searchTerm}</strong>
-      </p>
+      <input
+        id="search"
+        type="text"
+        value={props.search}
+        onChange={props.onSearch}
+      />
     </div>
   )
 }
