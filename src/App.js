@@ -4,40 +4,6 @@ import { useState } from 'react'
 //props argument => list attribute on List instantiation =>
 //stories array variable on the (parent) App component scope.
 
-const List = ({ list }) => (
-  <ul>
-    {list.map((item) => (
-      <li key={item.objectID}>
-        <span>
-          <a href={item.url}>{item.title}</a>
-        </span>
-        <span>{item.author}</span>
-        <span>{item.num_comments}</span>
-        <span>{item.points}</span>
-      </li>
-    ))}
-  </ul>
-)
-
-const Search = (props) => {
-  const [searchTerm, setSearchTerm] = useState('')
-
-  const handleChange = (event) => {
-    setSearchTerm(event.target.value)
-    props.onSearch(event)
-  }
-
-  return (
-    <div>
-      <label htmlFor="search">Search:</label>
-      <input id="search" type="text" onChange={handleChange} />
-      <p>
-        Searching for <strong>{searchTerm}</strong>
-      </p>
-    </div>
-  )
-}
-
 const App = () => {
   const handleSearch = (event) => {
     console.log(event.target.value)
@@ -65,11 +31,45 @@ const App = () => {
   return (
     <div>
       <h1>My hacker stories</h1>
-      <hr />
       <Search onSearch={handleSearch} />
+      <hr />
       <List list={stories} />
     </div>
   )
 }
+
+const Search = (props) => {
+  const [searchTerm, setSearchTerm] = useState('')
+
+  const handleChange = (event) => {
+    setSearchTerm(event.target.value)
+    props.onSearch(event)
+  }
+
+  return (
+    <div>
+      <label htmlFor="search">Search:</label>
+      <input id="search" type="text" onChange={handleChange} />
+      <p>
+        Searching for <strong>{searchTerm}</strong>
+      </p>
+    </div>
+  )
+}
+
+const List = ({ list }) => (
+  <ul>
+    {list.map((item) => (
+      <li key={item.objectID}>
+        <span>
+          <a href={item.url}>{item.title}</a>
+        </span>
+        <span>{item.author}</span>
+        <span>{item.num_comments}</span>
+        <span>{item.points}</span>
+      </li>
+    ))}
+  </ul>
+)
 
 export default App
