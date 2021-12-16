@@ -51,9 +51,9 @@ const Search = ({ search, onSearch }) => (
 )
 
 const List = ({ list }) =>
-  list.map((item) => <Item key={item.objectID} item={item} />)
+  list.map(({ objectID, ...item }) => <Item key={objectID} {...item} />)
 
-const Item = ({ item: { title, url, author, num_comments, points } }) => (
+const Item = ({ title, url, author, num_comments, points }) => (
   <div>
     <span>
       <a href={url}>{title}</a>
