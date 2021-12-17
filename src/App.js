@@ -1,6 +1,6 @@
 import './App.css'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 //props argument => list attribute on List instantiation =>
 //stories array variable on the (parent) App component scope.
 
@@ -23,11 +23,15 @@ const App = () => {
       objectID: 1,
     },
   ]
-  const [searchTerm, setSearchTerm] = useState('React')
+  const [searchTerm, setSearchTerm] = useState(
+    localStorage.getItem('search') || 'React'
+  )
 
-  const handleSearch = (event) => {
-    setSearchTerm(event.target.value)
-  }
+  useEffect(() => {
+    localStorage.setItem('search', searchTerm)
+  }, [searchTerm])
+
+  const handleSearch = (event) => setSearchTerm(event.target.value)
 
   const searchedStories = stories.filter((story) =>
     story.title.toLowerCase().includes(searchTerm.toLowerCase())
