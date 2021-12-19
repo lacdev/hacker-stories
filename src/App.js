@@ -1,8 +1,6 @@
 import './App.css'
 
-import { useEffect, useState } from 'react'
-//props argument => list attribute on List instantiation =>
-//stories array variable on the (parent) App component scope.
+import { useSemiPersistentState } from './hooks/semiPersistentState'
 
 const App = () => {
   const stories = [
@@ -23,13 +21,8 @@ const App = () => {
       objectID: 1,
     },
   ]
-  const [searchTerm, setSearchTerm] = useState(
-    localStorage.getItem('search') || 'React'
-  )
 
-  useEffect(() => {
-    localStorage.setItem('search', searchTerm)
-  }, [searchTerm])
+  const [searchTerm, setSearchTerm] = useSemiPersistentState('search', 'React')
 
   const handleSearch = (event) => setSearchTerm(event.target.value)
 
