@@ -2,6 +2,8 @@ import './App.css'
 
 import { useSemiPersistentState } from './hooks/semiPersistentState'
 
+import { InputWithLabel } from './components/InputWithLabel'
+
 const App = () => {
   const stories = [
     {
@@ -33,19 +35,17 @@ const App = () => {
   return (
     <div>
       <h1>My hacker stories</h1>
-      <Search search={searchTerm} onSearch={handleSearch} />
+      <InputWithLabel
+        id="search"
+        label="Search"
+        value={searchTerm}
+        onInputChange={handleSearch}
+      />
       <hr />
       <List list={searchedStories} />
     </div>
   )
 }
-
-const Search = ({ search, onSearch }) => (
-  <>
-    <label htmlFor="search">Search: </label>
-    <input id="search" type="text" value={search} onChange={onSearch} />
-  </>
-)
 
 const List = ({ list }) =>
   list.map(({ objectID, ...item }) => <Item key={objectID} {...item} />)
