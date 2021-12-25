@@ -11,7 +11,7 @@ const InputWithLabel = ({
   const inputRef = useRef()
 
   useEffect(() => {
-    if (isFocused && inputRef.current) {
+    if (isFocused) {
       inputRef.current.focus()
     }
   }, [isFocused])
@@ -20,7 +20,6 @@ const InputWithLabel = ({
     <>
       <label htmlFor={id}>{children}</label>
       &nbsp;
-      {/* B */}
       <input
         ref={inputRef}
         id={id}
