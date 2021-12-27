@@ -3,7 +3,7 @@ import './App.css'
 import { useSemiPersistentState } from './hooks/semiPersistentState'
 
 import { InputWithLabel } from './components/InputWithLabel'
-import { useEffect, useState } from 'react/cjs/react.development'
+import { useEffect, useState, useReducer } from 'react/cjs/react.development'
 
 const initialStories = [
   {
@@ -29,10 +29,28 @@ const getAsyncStories = () =>
     setTimeout(() => resolve({ data: { stories: initialStories } }), 1500)
   )
 
+const storiesReducer = (state, action) => {
+  switch (action.type) {
+    case 'SET_STORIES':
+      return action.payload
+    case 'REMOVE_STORY':
+      return state.filter((story) => action.payload.objectID !== story.objectID)
+    default:
+      throw new Error()
+  }
+  // if (action.type === 'SET_STORIES') {
+  //   return action.payload
+  // } else if (action.type === 'REMOVE_STORY') {
+  //   return state.filter((story) => action.payload.objectID !== story.objectID)
+  // } else {
+  //   throw new Error()
+  // }
+}
+
 const App = () => {
   const [searchTerm, setSearchTerm] = useSemiPersistentState('search', 'React')
-
-  const [stories, setStories] = useState([])
+  // const [stories, setStories] = useState([])
+  const [stories, dispatchStories] = useReducer(storiesReducer, [])
   const [isLoading, setIsLoading] = useState(false)
   const [isError, setIsError] = useState(false)
 
@@ -40,18 +58,25 @@ const App = () => {
     setIsLoading(true)
     getAsyncStories()
       .then((result) => {
-        setStories(result.data.stories)
+        dispatchStories({
+          type: 'SET_STORIES',
+          payload: result.data.stories,
+        })
+        // setStories(result.data.stories)
         setIsLoading(false)
       })
       .catch(() => setIsError(true))
   }, [])
 
   const handleRemoveStory = (item) => {
-    const newStories = stories.filter(
-      (story) => item.objectID !== story.objectID
-    )
-
-    setStories(newStories)
+    // const newStories = stories.filter(
+    //   (story) => item.objectID !== story.objectID
+    // )
+    dispatchStories({
+      type: 'REMOVE_STORY',
+      payload: item,
+    })
+    // setStories(newStories)
   }
 
   const handleSearch = (event) => setSearchTerm(event.target.value)
@@ -65,7 +90,6 @@ const App = () => {
       <h1>My hacker stories</h1>
       <InputWithLabel
         id="search"
-        label="Search"
         value={searchTerm}
         isFocused
         onInputChange={handleSearch}
@@ -85,8 +109,8 @@ const App = () => {
 }
 
 const List = ({ list, onRemoveItem }) =>
-  list.map(({ objectID, ...item }) => (
-    <Item key={objectID} item={item} onRemoveItem={onRemoveItem} />
+  list.map((item) => (
+    <Item key={item.objectID} item={item} onRemoveItem={onRemoveItem} />
   ))
 
 const Item = ({ item, onRemoveItem }) => {
@@ -101,7 +125,7 @@ const Item = ({ item, onRemoveItem }) => {
       <span>{item.num_comments}</span>
       <span>{item.points}</span>
       <span>
-        <button type="button" onClick={handleRemoveItem}>
+        <button type="button" onClick={() => onRemoveItem(item)}>
           Dismiss
         </button>
       </span>
