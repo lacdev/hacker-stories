@@ -1,6 +1,8 @@
-// const List = ({ list, onRemoveItem }) =>
-//   list.map(({ objectID, ...item }) => (
-//     <Item key={objectID} item={item} onRemoveItem={onRemoveItem} />
-//   ))
+import { Item } from './Item'
 
-// export { List }
+const List = ({ list, onRemoveItem }) =>
+  list.map((item) => (
+    <Item key={item.objectID} item={item} onRemoveItem={onRemoveItem} />
+  ))
+
+export { List }
