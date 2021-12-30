@@ -1,93 +1,94 @@
-import './App.css'
+import React from 'react'
 
-import { useSemiPersistentState } from './hooks/semiPersistentState'
+const API_ENDPOINT = 'https://hn.algolia.com/api/v1/search?query='
 
-import { InputWithLabel } from './components/InputWithLabel'
-import { useEffect, useState, useReducer } from 'react/cjs/react.development'
-
-const initialStories = [
-  {
-    title: 'React',
-    url: 'https://reactjs.org',
-    author: 'Jordan Walke',
-    num_comments: 3,
-    points: 4,
-    objectID: 0,
-  },
-  {
-    title: 'Redux',
-    url: 'https://redux.js.org/',
-    author: 'Dan Abramov, Andrew Clark',
-    num_comments: 2,
-    points: 5,
-    objectID: 1,
-  },
-]
-
-const getAsyncStories = () =>
-  new Promise((resolve) =>
-    setTimeout(() => resolve({ data: { stories: initialStories } }), 1500)
+const useSemiPersistentState = (key, initialState) => {
+  const [value, setValue] = React.useState(
+    localStorage.getItem(key) || initialState
   )
+
+  React.useEffect(() => {
+    localStorage.setItem(key, value)
+  }, [value, key])
+
+  return [value, setValue]
+}
 
 const storiesReducer = (state, action) => {
   switch (action.type) {
-    case 'SET_STORIES':
-      return action.payload
+    case 'STORIES_FETCH_INIT':
+      return {
+        ...state,
+        isLoading: true,
+        isError: false,
+      }
+    case 'STORIES_FETCH_SUCCESS':
+      return {
+        ...state,
+        isLoading: false,
+        isError: false,
+        data: action.payload,
+      }
+    case 'STORIES_FETCH_FAILURE':
+      return {
+        ...state,
+        isLoading: false,
+        isError: true,
+      }
     case 'REMOVE_STORY':
-      return state.filter((story) => action.payload.objectID !== story.objectID)
+      return {
+        ...state,
+        data: state.data.filter(
+          (story) => action.payload.objectID !== story.objectID
+        ),
+      }
     default:
       throw new Error()
   }
-  // if (action.type === 'SET_STORIES') {
-  //   return action.payload
-  // } else if (action.type === 'REMOVE_STORY') {
-  //   return state.filter((story) => action.payload.objectID !== story.objectID)
-  // } else {
-  //   throw new Error()
-  // }
 }
 
 const App = () => {
   const [searchTerm, setSearchTerm] = useSemiPersistentState('search', 'React')
-  // const [stories, setStories] = useState([])
-  const [stories, dispatchStories] = useReducer(storiesReducer, [])
-  const [isLoading, setIsLoading] = useState(false)
-  const [isError, setIsError] = useState(false)
 
-  useEffect(() => {
-    setIsLoading(true)
-    getAsyncStories()
+  const [stories, dispatchStories] = React.useReducer(storiesReducer, {
+    data: [],
+    isLoading: false,
+    isError: false,
+  })
+
+  React.useEffect(() => {
+    dispatchStories({ type: 'STORIES_FETCH_INIT' })
+
+    fetch(`${API_ENDPOINT}react`)
+      .then((response) => response.json())
       .then((result) => {
         dispatchStories({
-          type: 'SET_STORIES',
-          payload: result.data.stories,
+          type: 'STORIES_FETCH_SUCCESS',
+          payload: result.hits,
         })
-        // setStories(result.data.stories)
-        setIsLoading(false)
       })
-      .catch(() => setIsError(true))
+      .catch(() => dispatchStories({ type: 'STORIES_FETCH_FAILURE' }))
   }, [])
 
   const handleRemoveStory = (item) => {
-    // const newStories = stories.filter(
-    //   (story) => item.objectID !== story.objectID
-    // )
     dispatchStories({
       type: 'REMOVE_STORY',
       payload: item,
     })
-    // setStories(newStories)
   }
 
-  const handleSearch = (event) => setSearchTerm(event.target.value)
+  const handleSearch = (event) => {
+    setSearchTerm(event.target.value)
+  }
 
-  const searchedStories = stories.filter((story) =>
+  const searchedStories = stories.data.filter((story) =>
     story.title.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   return (
     <div>
-      <h1>My hacker stories</h1>
+      <h1>My Hacker Stories</h1>
+
       <InputWithLabel
         id="search"
         value={searchTerm}
@@ -96,15 +97,48 @@ const App = () => {
       >
         <strong>Search:</strong>
       </InputWithLabel>
-      <hr />
-      {isError && <p>Something went wrong while trying to get the data.</p>}
 
-      {isLoading ? (
-        <h3>Loading stories...</h3>
+      <hr />
+
+      {stories.isError && <p>Something went wrong ...</p>}
+
+      {stories.isLoading ? (
+        <p>Loading ...</p>
       ) : (
         <List list={searchedStories} onRemoveItem={handleRemoveStory} />
       )}
     </div>
+  )
+}
+
+const InputWithLabel = ({
+  id,
+  value,
+  type = 'text',
+  onInputChange,
+  isFocused,
+  children,
+}) => {
+  const inputRef = React.useRef()
+
+  React.useEffect(() => {
+    if (isFocused) {
+      inputRef.current.focus()
+    }
+  }, [isFocused])
+
+  return (
+    <>
+      <label htmlFor={id}>{children}</label>
+      &nbsp;
+      <input
+        ref={inputRef}
+        id={id}
+        type={type}
+        value={value}
+        onChange={onInputChange}
+      />
+    </>
   )
 }
 
@@ -113,24 +147,20 @@ const List = ({ list, onRemoveItem }) =>
     <Item key={item.objectID} item={item} onRemoveItem={onRemoveItem} />
   ))
 
-const Item = ({ item, onRemoveItem }) => {
-  const handleRemoveItem = () => onRemoveItem(item)
-
-  return (
-    <div>
-      <span>
-        <a href={item.url}>{item.title}</a>
-      </span>
-      <span>{item.author}</span>
-      <span>{item.num_comments}</span>
-      <span>{item.points}</span>
-      <span>
-        <button type="button" onClick={() => onRemoveItem(item)}>
-          Dismiss
-        </button>
-      </span>
-    </div>
-  )
-}
+const Item = ({ item, onRemoveItem }) => (
+  <div>
+    <span>
+      <a href={item.url}>{item.title}</a>
+    </span>
+    <span>{item.author}</span>
+    <span>{item.num_comments}</span>
+    <span>{item.points}</span>
+    <span>
+      <button type="button" onClick={() => onRemoveItem(item)}>
+        Dismiss
+      </button>
+    </span>
+  </div>
+)
 
 export default App
